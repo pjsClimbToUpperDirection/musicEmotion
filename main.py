@@ -98,7 +98,7 @@ len(X), len(Y), data_path.Path.shape
 # Save the features in a CSV file
 Emotions = pd.DataFrame(X)
 Emotions['Emotions'] = Y
-Emotions.to_csv('emotion.csv', index=False)
+Emotions.to_csv('emotion.csv', index=False) # 본 csv 파일 gitignore 처리
 Emotions.head()
 Emotions.tail()
 
