@@ -137,3 +137,73 @@ scaler = StandardScaler()
 x_train = scaler.fit_transform(x_train) # (x - u) / s, 이때 u는 평균, s는 표준편차(standard deviation)
 x_test = scaler.transform(x_test)
 print("x_train.shape, y_train.shape, x_test.shape, y_test.shape: ", x_train.shape, y_train.shape, x_test.shape, y_test.shape)
+
+
+#
+# 여기서부터 훈련 영역
+#
+from keras.callbacks import ModelCheckpoint, EarlyStopping,ReduceLROnPlateau
+model_checkpoint = ModelCheckpoint('best_model1_weights.h5', monitor='val_accuracy', save_best_only=True)
+
+early_stop=EarlyStopping(monitor='val_acc',mode='auto',patience=5,restore_best_weights=True)
+lr_reduction=ReduceLROnPlateau(monitor='val_acc',patience=3,verbose=1,factor=0.5,min_lr=0.00001)
+
+x_traincnn =np.expand_dims(x_train, axis=2)
+x_testcnn= np.expand_dims(x_test, axis=2)
+print("x_traincnn.shape, y_train.shape, x_testcnn.shape, y_test.shape: ", x_traincnn.shape, y_train.shape, x_testcnn.shape, y_test.shape)
+
+
+
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv1D, BatchNormalization, MaxPool1D, Dropout, Flatten, Dense
+
+model = Sequential([
+    Conv1D(16, kernel_size=5, strides=1, padding='same', activation='relu', input_shape=(X_train.shape[1], 1)),
+    BatchNormalization(),
+    MaxPool1D(pool_size=5, strides=2, padding='same'),
+
+    Conv1D(8,kernel_size=3,strides=1,padding='same',activation='relu'),
+    BatchNormalization(),
+    MaxPool1D(pool_size=3,strides=2,padding='same'),
+    Dropout(0.3),  # Add dropout layer after the fifth max pooling layer
+
+    Flatten(),
+    Dense(8,activation='relu'),
+    BatchNormalization(),
+    Dense(5,activation='softmax')
+])
+model.compile(optimizer='adam',loss='categorical_crossentropy',metrics='accuracy')
+model.summary()
+
+history=model.fit(x_traincnn, y_train,
+                  epochs=30,
+                  validation_data=(x_testcnn, y_test),
+                  batch_size=16,
+                  callbacks=[early_stop,lr_reduction,model_checkpoint])
+
+print("Accuracy of our model on test data : " , model.evaluate(x_testcnn,y_test)[1]*100 , "%")
+
+
+# predicting on test data.
+pred_test0 = model.predict(x_testcnn)
+y_pred0 = encoder.inverse_transform(pred_test0)
+y_test0 = encoder.inverse_transform(y_test)
+
+# Check for random predictions
+df0 = pd.DataFrame(columns=['Predicted Labels', 'Actual Labels'])
+df0['Predicted Labels'] = y_pred0.flatten()
+df0['Actual Labels'] = y_test0.flatten()
+
+df0.head(10)
+
+from sklearn.metrics import confusion_matrix,classification_report
+cm = confusion_matrix(y_test0, y_pred0)
+plt.figure(figsize=(12, 10))
+cm = pd.DataFrame(cm, index=[i for i in encoder.categories_], columns=[i for i in encoder.categories_])
+#cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+sns.heatmap(cm, linecolor='white', cmap='Blues', linewidth=1, annot=True, fmt='.2f')
+plt.title('Confusion Matrix', size=20)
+plt.xlabel('Predicted Labels', size=14)
+plt.ylabel('Actual Labels', size=14)
+plt.show()
+print(classification_report(y_test0, y_pred0))

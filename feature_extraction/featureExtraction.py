@@ -30,7 +30,7 @@ def extract_features(data, sr=22050, frame_length=2048, hop_length=512):
     result=np.hstack((result,
                       zcr(data,frame_length,hop_length),
                       rmse(data,frame_length,hop_length),
-                      mfcc(data,sr,frame_length,hop_length)
+                      mfcc(data,sr)
                       ))
     return result
 
