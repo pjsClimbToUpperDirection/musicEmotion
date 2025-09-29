@@ -19,7 +19,7 @@ def rmse(data, frame_length=2048, hop_length=512):
 
 # Mel-Frequency Cepstral coefficient
 def mfcc(data,sr, frame_length=2048, hop_length=512, flatten:bool=True):
-    mfcc=librosa.feature.mfcc(y=data,sr=sr, frame_length=frame_length, hop_length=hop_length)
+    mfcc=librosa.feature.mfcc(y=data,sr=sr)
     return np.squeeze(mfcc.T) if not flatten else np.ravel(mfcc.T) # (N,) shape 의 배열
 
 # Combine all feature functions
