@@ -41,6 +41,7 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 import tensorflow as tf
 print("Done")
 
+# 데이터셋을 불러오는 동작
 data_path, data, sr = dataset_Loading()
 
 # NORMAL AUDIO
@@ -81,12 +82,12 @@ from tqdm import tqdm
 # Extract the features.
 start = timeit.default_timer()
 X,Y=[],[]
-for path,emotion,index in tqdm (zip(data_path.Path,data_path.Cluster,range(data_path.Path.shape[0]))):
-    features=get_features(path)
-    if index%500==0:
+for path, emotion, index in tqdm(zip(data_path.Path,data_path.Cluster, range(data_path.Path.shape[0]))):
+    features = get_features(path) # 여러 특징 추출법을 통해 반환된 값을 조합한 뒤 증강 기법 사용하여 성능 향상
+    if index % 500 == 0:
         print(f'{index} audio has been processed')
     for i in features:
-        X.append(i)
+        X.append(i) # 동일한 emotion 라벨에 대하여 오리지널 및 증강된 데이터 append(총 4개)
         Y.append(emotion)
 print('Done')
 stop = timeit.default_timer()
@@ -102,26 +103,20 @@ Emotions.to_csv('emotion.csv', index=False) # 본 csv 파일 gitignore 처리
 Emotions.head()
 Emotions.tail()
 
-Emotions.shape
 
-# checking data integrity for feature preparation
+# checking data integrity for feature preparation(데이터 무결성 확인)
 print(Emotions.isna().any())
-Emotions=Emotions.fillna(0)
+Emotions=Emotions.fillna(0) # nan 은 0으로 채움
 print(Emotions.isna().any())
-Emotions.shape
 np.sum(Emotions.isna())
 
-#taking all rows and all cols without last col for X which include features
-#taking last col for Y, which include the emotions
 
+X = Emotions.iloc[: ,:-1].values # 데이터
+Y = Emotions['Emotions'].values # (지도 학습을 위한)라벨
 
-X = Emotions.iloc[: ,:-1].values
-Y = Emotions['Emotions'].values
-Y
-
-# As this is a multiclass classification problem onehotencoding our Y
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 encoder = OneHotEncoder()
+# 각 데이터에 대응되는 emotion 값을 1차원 배열로 만든 뒤(a -> [a]) one hot encoding
 Y = encoder.fit_transform(np.array(Y).reshape(-1,1)).toarray()
 
 print("X.shape: ", X.shape)
@@ -139,6 +134,6 @@ X_test = x_test.reshape(x_test.shape[0] , x_test.shape[1] , 1)
 
 # scaling our data with sklearn's Standard scaler
 scaler = StandardScaler()
-x_train = scaler.fit_transform(x_train)
+x_train = scaler.fit_transform(x_train) # (x - u) / s, 이때 u는 평균, s는 표준편차(standard deviation)
 x_test = scaler.transform(x_test)
 print("x_train.shape, y_train.shape, x_test.shape, y_test.shape: ", x_train.shape, y_train.shape, x_test.shape, y_test.shape)

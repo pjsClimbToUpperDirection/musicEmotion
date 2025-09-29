@@ -52,6 +52,8 @@ def dataset_Loading():
 
     file_paths_df = pd.DataFrame(file_paths, columns=['Path'])
     cluster_numbers_df = pd.DataFrame(cluster_numbers, columns=['Cluster'])
+
+    # 각 데이터(path) 에 emotion 라벨링
     data_path = pd.concat([cluster_numbers_df, file_paths_df], axis=1)
 
     print(data_path.Cluster.value_counts())
@@ -77,14 +79,14 @@ def dataset_Loading():
     # CREATE LOG MEL SPECTROGRAM
     plt.figure(figsize=(10, 5))
     spectrogram = librosa.feature.melspectrogram(y=data, sr=sr, n_mels=128,fmax=8000)
-    log_spectrogram = librosa.power_to_db(spectrogram) # 데시벨 단위 변환
-    librosa.display.specshow(log_spectrogram, y_axis='mel', sr=sr, x_axis='time')
+    log_spectrogram = librosa.power_to_db(spectrogram) # 데시벨 단위 변환 (S_db ~= 10 * log10(S) - 10 * log10(ref), (ref는 기본 1.0))
+    librosa.display.specshow(log_spectrogram, y_axis='mel', sr=sr, x_axis='time') # 출력
     plt.title('Mel Spectrogram ')
     plt.colorbar(format='%+2.0f dB')
     plt.show()
 
 
-    mfcc = librosa.feature.mfcc(y=data, sr=sr, n_mfcc=30)
+    mfcc = librosa.feature.mfcc(y=data, sr=sr, n_mfcc=30) # mfcc
 
     # MFCC
     plt.figure(figsize=(16, 10))
