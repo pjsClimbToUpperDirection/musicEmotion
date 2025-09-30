@@ -11,23 +11,6 @@ import librosa.display
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from sklearn.metrics import confusion_matrix, classification_report
-from sklearn.model_selection import train_test_split
-
-import keras
-from keras.preprocessing import sequence
-from keras.models import Sequential
-from keras.layers import Dense, Embedding
-from keras.layers import LSTM,BatchNormalization , GRU
-from keras.preprocessing.text import Tokenizer
-from keras.preprocessing.sequence import pad_sequences
-from tensorflow.keras.utils import to_categorical
-from keras.layers import Input, Flatten, Dropout, Activation
-from keras.layers import Conv1D, MaxPooling1D, AveragePooling1D
-from keras.models import Model
-from keras.callbacks import ModelCheckpoint
-from tensorflow.keras.optimizers import SGD
 
 from data_loading.loading import dataset_Loading
 from data_augmentation.augmentation import noise, stretch, shift, pitch
